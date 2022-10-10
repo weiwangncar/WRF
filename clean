@@ -3,7 +3,7 @@
 set nonomatch
 
 
-foreach dir ( frame chem share dyn_em phys cmaq main tools wrftladj )
+foreach dir ( frame chem share dyn_em phys phys/physics_mmm cmaq main tools wrftladj )
   if ( -d $dir ) then
      if ( $dir == cmaq ) then
         ( cd $dir ; echo $dir ; /bin/rm -f *.o *.mod ) >& /dev/null
