@@ -4,9 +4,6 @@ LN      =       ln -sf
 MAKE    =       make -i -r
 RM      =       rm -f
 
-#all:
-#	../tools/manage_externals/checkout_externals --externals ../arch/Externals.cfg
-
 MODULES = \
 	module_bep_bem_helper.o \
 	complex_number_module.o \
