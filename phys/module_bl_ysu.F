@@ -36,6 +36,7 @@ contains
                   b_t_bep,b_q_bep,                                             &
                   b_e_bep,dlg_bep,                                             &
                   dl_u_bep,sf_bep,vl_bep,                                      &
+                  errmsg,errflg,                                               &
                   ids,ide, jds,jde, kds,kde,                                   &
                   ims,ime, jms,jme, kms,kme,                                   &
                   its,ite, jts,jte, kts,kte,                                   &
@@ -43,6 +44,7 @@ contains
                   regime                                                       &
                  )
 !-------------------------------------------------------------------------------
+   USE bl_ysu
    implicit none
 !-------------------------------------------------------------------------------
 !-- u3d         3d u-velocity interpolated to theta points (m/s)
@@ -216,6 +218,10 @@ contains
                                                                 vl_bep,sf_bep
    real, dimension(ims:ime,jms:jme),intent(in) :: frc_urb2d
 !
+
+   character(len=*), intent(out)      ::                                errmsg
+   integer,          intent(out)      ::                                errflg
+
 !optional
 !
    real,     dimension( ims:ime, jms:jme )                                   , &
