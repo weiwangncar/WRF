@@ -240,11 +240,24 @@ contains
    integer ::  i,j,k
    real,     dimension( its:ite, kts:kte*ndiff )  ::                 rqvbl2dt, &
                                                                          qv2d
+   real,     dimension( its:ite, kts:kte )  :: ux, vx, tx
+   real,     dimension( its:ite, kts:kte )  :: pi2d
    real,     dimension( its:ite, kts:kte )  :: qvx, qcx, qix 
+   real,     dimension( its:ite, kts:kte )  :: utnp, vtnp, ttnp 
    real,     dimension( its:ite, kts:kte )  :: qvtnp, qctnp, qitnp 
    real,     dimension( its:ite, kts:kte, 1 )  :: qmix, qmixtnp    ! array for tracers
+   real,     dimension( its:ite, kts:kte )  :: dz8w2d
+   real,     dimension( its:ite, kts:kte )  :: rthratenx
+   real,     dimension( its:ite, kts:kte )  :: exch_hx, exch_mx
    real,     dimension( its:ite, kts:kte )  ::                            pdh
    real,     dimension( its:ite, kts:kte+1 )  ::                         pdhi
+   real,     dimension( its:ite )  :: psfcpa, zntj, ustj
+   real,     dimension( its:ite )  :: hpblj, psimj, psihj, xlandj
+   real,     dimension( its:ite )  :: hfxj, qfxj, wspdj, brj
+   integer,  dimension( its:ite )  :: kpbl1d
+   real,     dimension( its:ite )  :: wstarj, deltaj
+   real,     dimension( its:ite )  :: u10j, v10j, uocej, vocej
+   real,     dimension( its:ite )  :: ctopoj, ctopo2j
    real,     dimension( its:ite )  ::                                          &
                                                                         dusfc, &
                                                                         dvsfc, &
@@ -257,6 +270,12 @@ contains
 !
    qv2d(its:ite,:) = 0.0
    qmix(its:ite, kts:kte, 1) = 0.0
+   utnp = 0.0
+   vtnp = 0.0
+   ttnp = 0.0
+   qvtnp = 0.0
+   qctnp = 0.0
+   qitnp = 0.0
 !
    bepswitch = 0.0
    a_u(:,:,:)=0.0
@@ -285,13 +304,43 @@ contains
 
       do k = kts,kte
         do i = its,ite
-          qv2d(i,k) = qv3d(i,k,j)
-          qv2d(i,k+kte) = qc3d(i,k,j)
-          if(flag_qi) qv2d(i,k+kte+kte) = qi3d(i,k,j)
+          ux(i,k) = u3d(i,k,j)
+          vx(i,k) = v3d(i,k,j)
+          tx(i,k) = t3d(i,k,j)
+          pi2d(i,k) = pi3d(i,k,j)
+          dz8w2d(i,k) = dz8w(i,k,j)
+!         qv2d(i,k) = qv3d(i,k,j)
+!         qv2d(i,k+kte) = qc3d(i,k,j)
+!         if(flag_qi) qv2d(i,k+kte+kte) = qi3d(i,k,j)
           qvx(i,k) = qv3d(i,k,j)
           qcx(i,k) = qc3d(i,k,j)
           if(flag_qi) qix(i,k) = qi3d(i,k,j)
+          rthratenx(i,k) = rthraten(i,k,j)
+          exch_hx(i,k) = exch_h(i,k,j)
+          exch_mx(i,k) = exch_m(i,k,j)
         enddo
+      enddo
+
+      do i = its,ite
+         psfcpa(i) = psfc(i,j)
+         zntj(i) = znt(i,j)
+         ustj(i) = ust(i,j)
+         hpblj(i) = hpbl(i,j)
+         psimj(i) = psim(i,j)
+         psihj(i) = psih(i,j)
+         xlandj(i) = xland(i,j)
+         hfxj(i) = hfx(i,j)
+         qfxj(i) = qfx(i,j)
+         wspdj(i) = wspd(i,j)
+         kpbl1d(i) = kpbl2d(i,j)
+         wstarj(i) = wstar(i,j)
+         deltaj(i) = delta(i,j)
+         u10j(i) = u10(i,j)
+         v10j(i) = v10(i,j)
+         uocej(i) = uoce(i,j)
+         vocej(i) = voce(i,j)
+         ctopoj(i) = ctopo(i,j)
+         ctopo2j(i) = ctopo2(i,j)
       enddo
 
       if(flag_bep) then
@@ -317,39 +366,39 @@ contains
         enddo
       endif
 !
-      call bl_ysu_run(ux=u3d(ims,kms,j),vx=v3d(ims,kms,j)                      &
-              ,tx=t3d(ims,kms,j)                                               &
+      call bl_ysu_run(ux=ux,vx=vx                                              &
+              ,tx=tx                                                           &
               ,qvx=qvx(its,kts)                                                &
               ,qcx=qcx(its,kts)                                                &
               ,qix=qix(its,kts)                                                &
               ,nmix=1,qmix=qmix(its,kts,1)                                     &
               ,p2d=pdh(its,kts),p2di=pdhi(its,kts)                             &
-              ,pi2d=pi3d(ims,kms,j)                                            &
+              ,pi2d=pi2d                                                       &
               ,f_qc=.true.,f_qi=flag_qi                                        &
-              ,utnp=rublten(ims,kms,j),vtnp=rvblten(ims,kms,j)                 &
-              ,ttnp=rthblten(ims,kms,j),qvtnp=qvtnp(its,kts)                   &
+              ,utnp=utnp,vtnp=vtnp                                             &
+              ,ttnp=ttnp,qvtnp=qvtnp(its,kts)                                  &
               ,qctnp=qctnp(its,kts),qitnp=qitnp(its,kts)                       & 
               ,qmixtnp=qmixtnp(its,kts,1)                                      & 
               ,cp=cp,g=g,rovcp=rovcp,rd=rd,rovg=rovg                           &    
               ,xlv=xlv,rv=rv                                                   &
               ,ep1=ep1,ep2=ep2,karman=karman                                   &
-              ,dz8w2d=dz8w(ims,kms,j)                                          &
-              ,psfcpa=psfc(ims,j),znt=znt(ims,j),ust=ust(ims,j)                &
-              ,hpbl=hpbl(ims,j)                                                &
-              ,psim=psim(ims,j)                                                &
-              ,psih=psih(ims,j),xland=xland(ims,j)                             &
-              ,hfx=hfx(ims,j),qfx=qfx(ims,j)                                   &
-              ,wspd=wspd(ims,j),br=br(ims,j)                                   &
-              ,dt=dt,kpbl1d=kpbl2d(ims,j)                                      &
-              ,exch_hx=exch_h(ims,kms,j)                                       &
-              ,exch_mx=exch_m(ims,kms,j)                                       &
-              ,wstar=wstar(ims,j)                                              &
-              ,delta=delta(ims,j)                                              &
-              ,u10=u10(ims,j),v10=v10(ims,j)                                   &
-              ,uox=uoce(ims,j),vox=voce(ims,j)                                 &
-              ,rthraten=rthraten(ims,kms,j)                                    &
+              ,dz8w2d=dz8w2d                                                   &
+              ,psfcpa=psfcpa,znt=zntj,ust=ustj                                 &
+              ,hpbl=hpblj                                                      &
+              ,psim=psimj                                                      &
+              ,psih=psihj,xland=xlandj                                         &
+              ,hfx=hfxj,qfx=qfxj                                               &
+              ,wspd=wspdj,br=brj                                               &
+              ,dt=dt,kpbl1d=kpbl1d                                             &
+              ,exch_hx=exch_hx                                                 &
+              ,exch_mx=exch_mx                                                 &
+              ,wstar=wstarj                                                    &
+              ,delta=deltaj                                                    &
+              ,u10=u10j,v10=v10j                                               &
+              ,uox=uocej,vox=vocej                                             &
+              ,rthraten=rthratenx                                              &
               ,ysu_topdown_pblmix=ysu_topdown_pblmix                           &
-              ,ctopo=ctopo(ims,j),ctopo2=ctopo2(ims,j)                         &
+              ,ctopo=ctopoj,ctopo2=ctopo2j                                     &
               ,a_u=a_u(its,kts,j), a_v=a_v(its,kts,j)                          &
               ,a_t=a_t(its,kts,j), a_q=a_q(its,kts,j)                          &
               ,b_u=b_u(its,kts,j), b_v=b_v(its,kts,j)                          &
@@ -363,10 +412,13 @@ contains
 !
      do k = kts,kte
        do i = its,ite
-         rthblten(i,k,j) = rthblten(i,k,j)/pi3d(i,k,j)
-         rqvblten(i,k,j) = rqvbl2dt(i,k)
-         rqcblten(i,k,j) = rqvbl2dt(i,k+kte)
-         if(flag_qi) rqiblten(i,k,j) = rqvbl2dt(i,k+kte+kte)
+         rthblten(i,k,j) = ttnp(i,k)/pi3d(i,k,j)
+!        rqvblten(i,k,j) = rqvbl2dt(i,k)
+!        rqcblten(i,k,j) = rqvbl2dt(i,k+kte)
+!        if(flag_qi) rqiblten(i,k,j) = rqvbl2dt(i,k+kte+kte)
+         rqvblten(i,k,j) = qvtnp(i,k)
+         rqcblten(i,k,j) = qctnp(i,k)
+         if(flag_qi) rqiblten(i,k,j) = qitnp(i,k)
        enddo
      enddo
 !
