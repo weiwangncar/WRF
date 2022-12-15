@@ -240,6 +240,9 @@ contains
    integer ::  i,j,k
    real,     dimension( its:ite, kts:kte*ndiff )  ::                 rqvbl2dt, &
                                                                          qv2d
+   real,     dimension( its:ite, kts:kte )  :: qvx, qcx, qix 
+   real,     dimension( its:ite, kts:kte )  :: qvtnp, qctnp, qitnp 
+   real,     dimension( its:ite, kts:kte, 1 )  :: qmix, qmixtnp    ! array for tracers
    real,     dimension( its:ite, kts:kte )  ::                            pdh
    real,     dimension( its:ite, kts:kte+1 )  ::                         pdhi
    real,     dimension( its:ite )  ::                                          &
@@ -253,6 +256,7 @@ contains
    real :: bepswitch ! 0 if not using bep or bep+bem, 1 if using
 !
    qv2d(its:ite,:) = 0.0
+   qmix(its:ite, kts:kte, 1) = 0.0
 !
    bepswitch = 0.0
    a_u(:,:,:)=0.0
@@ -284,6 +288,9 @@ contains
           qv2d(i,k) = qv3d(i,k,j)
           qv2d(i,k+kte) = qc3d(i,k,j)
           if(flag_qi) qv2d(i,k+kte+kte) = qi3d(i,k,j)
+          qvx(i,k) = qv3d(i,k,j)
+          qcx(i,k) = qc3d(i,k,j)
+          if(flag_qi) qix(i,k) = qi3d(i,k,j)
         enddo
       enddo
 
@@ -310,45 +317,49 @@ contains
         enddo
       endif
 !
-      call ysu2d(J=j,ux=u3d(ims,kms,j),vx=v3d(ims,kms,j)                       &
+      call bl_ysu_run(ux=u3d(ims,kms,j),vx=v3d(ims,kms,j)                      &
               ,tx=t3d(ims,kms,j)                                               &
-              ,qx=qv2d(its,kts)                                                &
+              ,qvx=qvx(its,kts)                                                &
+              ,qcx=qcx(its,kts)                                                &
+              ,qix=qix(its,kts)                                                &
+              ,nmix=1,qmix=qmix(its,kts,1)                                     &
               ,p2d=pdh(its,kts),p2di=pdhi(its,kts)                             &
               ,pi2d=pi3d(ims,kms,j)                                            &
+              ,f_qc=.true.,f_qi=flag_qi                                        &
               ,utnp=rublten(ims,kms,j),vtnp=rvblten(ims,kms,j)                 &
-              ,ttnp=rthblten(ims,kms,j),qtnp=rqvbl2dt(its,kts),ndiff=ndiff     &
+              ,ttnp=rthblten(ims,kms,j),qvtnp=qvtnp(its,kts)                   &
+              ,qctnp=qctnp(its,kts),qitnp=qitnp(its,kts)                       & 
+              ,qmixtnp=qmixtnp(its,kts,1)                                      & 
               ,cp=cp,g=g,rovcp=rovcp,rd=rd,rovg=rovg                           &    
               ,xlv=xlv,rv=rv                                                   &
               ,ep1=ep1,ep2=ep2,karman=karman                                   &
               ,dz8w2d=dz8w(ims,kms,j)                                          &
               ,psfcpa=psfc(ims,j),znt=znt(ims,j),ust=ust(ims,j)                &
               ,hpbl=hpbl(ims,j)                                                &
-              ,regime=regime(ims,j),psim=psim(ims,j)                           &
+              ,psim=psim(ims,j)                                                &
               ,psih=psih(ims,j),xland=xland(ims,j)                             &
               ,hfx=hfx(ims,j),qfx=qfx(ims,j)                                   &
               ,wspd=wspd(ims,j),br=br(ims,j)                                   &
-              ,dusfc=dusfc,dvsfc=dvsfc,dtsfc=dtsfc,dqsfc=dqsfc                 &
-              ,dt=dt,rcl=1.0,kpbl1d=kpbl2d(ims,j)                              &
+              ,dt=dt,kpbl1d=kpbl2d(ims,j)                                      &
               ,exch_hx=exch_h(ims,kms,j)                                       &
               ,exch_mx=exch_m(ims,kms,j)                                       &
               ,wstar=wstar(ims,j)                                              &
               ,delta=delta(ims,j)                                              &
               ,u10=u10(ims,j),v10=v10(ims,j)                                   &
               ,uox=uoce(ims,j),vox=voce(ims,j)                                 &
-              ,rthraten=rthraten(ims,kms,j),p2diORG=p3di(ims,kms,j)            &
+              ,rthraten=rthraten(ims,kms,j)                                    &
               ,ysu_topdown_pblmix=ysu_topdown_pblmix                           &
               ,ctopo=ctopo(ims,j),ctopo2=ctopo2(ims,j)                         &
-              ,a_u2d=a_u(its,kts,j), a_v2d=a_v(its,kts,j)                      &
-              ,a_t2d=a_t(its,kts,j), a_q2d=a_q(its,kts,j)                      &
-              ,b_u2d=b_u(its,kts,j), b_v2d=b_v(its,kts,j)                      &
-              ,b_t2d=b_t(its,kts,j), b_q2d=b_q(its,kts,j)                      &
-              ,b_e2d=b_e(its,kts,j), a_e2d=a_e(its,kts,j)                      &
-              ,sfk2d=sfk(its,kts,j), vlk2d=vlk(its,kts,j)                      &
-              ,dlu2d=dl_u(its,kts,j), dlg2d=dlg(its,kts,j)                     &
-              ,frc_urb1d=frcurb(its,j), bepswitch=bepswitch                    &
-              ,ids=ids,ide=ide, jds=jds,jde=jde, kds=kds,kde=kde               &
-              ,ims=ims,ime=ime, jms=jms,jme=jme, kms=kms,kme=kme               &
-              ,its=its,ite=ite, jts=jts,jte=jte, kts=kts,kte=kte   )
+              ,a_u=a_u(its,kts,j), a_v=a_v(its,kts,j)                          &
+              ,a_t=a_t(its,kts,j), a_q=a_q(its,kts,j)                          &
+              ,b_u=b_u(its,kts,j), b_v=b_v(its,kts,j)                          &
+              ,b_t=b_t(its,kts,j), b_q=b_q(its,kts,j)                          &
+              ,b_e=b_e(its,kts,j), a_e=a_e(its,kts,j)                          &
+              ,sfk=sfk(its,kts,j), vlk=vlk(its,kts,j)                          &
+              ,dlu=dl_u(its,kts,j), dlg=dlg(its,kts,j)                         &
+              ,frcurb=frcurb(its,j), flag_bep=flag_bep                         &
+              ,its=its,ite=ite, kte=kte,kme=kme                                &
+              ,errmsg=errmsg, errflg=errflg   )
 !
      do k = kts,kte
        do i = its,ite
