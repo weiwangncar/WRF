@@ -266,10 +266,15 @@ contains
    real,dimension(its:ite,kts:kte) :: a_u,a_v,a_t,a_e,b_u,b_v,b_t,b_e, &
                                                      a_q,b_q,dlg,dl_u,sfk,vlk
    real,dimension(its:ite)         :: frcurb
+!  local for WRF qmix tracer array
+   real,   dimension(ims:ime,kms:kme,jms:jme,1):: qmix3d, rqmixblten
    real :: bepswitch ! 0 if not using bep or bep+bem, 1 if using
 !
    qv2d(its:ite,:) = 0.0
+   qmix3d = 0.0
+   rqmixblten = 0.0
    qmix(its:ite, kts:kte, 1) = 0.0
+   qmixtnp(its:ite, kts:kte, 1) = 0.0
    utnp = 0.0
    vtnp = 0.0
    ttnp = 0.0
@@ -412,6 +417,8 @@ contains
 !
      do k = kts,kte
        do i = its,ite
+         rublten(i,k,j) = utnp(i,k)
+         rvblten(i,k,j) = vtnp(i,k)
          rthblten(i,k,j) = ttnp(i,k)/pi3d(i,k,j)
 !        rqvblten(i,k,j) = rqvbl2dt(i,k)
 !        rqcblten(i,k,j) = rqvbl2dt(i,k+kte)
@@ -419,7 +426,18 @@ contains
          rqvblten(i,k,j) = qvtnp(i,k)
          rqcblten(i,k,j) = qctnp(i,k)
          if(flag_qi) rqiblten(i,k,j) = qitnp(i,k)
+         rqmixblten(i,k,j,1) = qmixtnp(i,k,1)
+         exch_h(i,k,j) = exch_hx(i,k)
+         exch_m(i,k,j) = exch_mx(i,k)
        enddo
+     enddo
+!
+     do i = its,ite
+       hpbl(i,j) = hpblj(i)
+       kpbl2d(i,j) = kpbl1d(i)
+       wstar(i,j) = wstarj(i)
+       u10(i,j) = u10j(i)
+       v10(i,j) = v10j(i)
      enddo
 !
    enddo
