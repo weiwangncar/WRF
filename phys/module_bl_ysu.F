@@ -436,6 +436,7 @@ contains
        hpbl(i,j) = hpblj(i)
        kpbl2d(i,j) = kpbl1d(i)
        wstar(i,j) = wstarj(i)
+       delta(i,j) = deltaj(i)
        u10(i,j) = u10j(i)
        v10(i,j) = v10j(i)
      enddo
