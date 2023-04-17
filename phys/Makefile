@@ -229,7 +229,8 @@ DIAGNOSTIC_MODULES_EM = \
   
 PHYSMMM_MODULES = \
 	./physics_mmm/bl_gwdo.o \
-	./physics_mmm/bl_ysu.o
+	./physics_mmm/bl_ysu.o \
+	./physics_mmm/sf_sfclayrev.o
 
 OBJS    =
 
