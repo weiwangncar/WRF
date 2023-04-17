@@ -26,7 +26,7 @@ CONTAINS
                      its,ite, jts,jte, kts,kte,                    &
                      ustm,ck,cka,cd,cda,isftcflx,iz0tlnd,          &
                      shalwater_z0,water_depth,shalwater_depth,     & 
-                     scm_force_flux                                )
+                     scm_force_flux,errmsg,errflg                  )
 !-------------------------------------------------------------------
       IMPLICIT NONE
 !-------------------------------------------------------------------
@@ -181,7 +181,10 @@ CONTAINS
                 INTENT(INOUT)   ::                                 &
                                                               QGH
                                     
-      REAL,     INTENT(IN   )               ::   CP,G,ROVCP,R,XLV,DX
+      REAL,     INTENT(IN   )               ::   CP,G,ROVCP,R,XLV
+
+      REAL,     DIMENSION( ims:ime, jms:jme )                    , &
+                INTENT(IN   )               ::                 DX
  
       REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme )              , &
                 INTENT(OUT)     ::                  ck,cka,cd,cda
@@ -195,6 +198,8 @@ CONTAINS
       INTEGER,  INTENT(IN )   ::     shalwater_z0 
       REAL,     INTENT(IN )   ::     shalwater_depth 
       REAL,     DIMENSION( ims:ime, jms:jme ), INTENT(IN)  :: water_depth 
+      character*256 :: errmsg
+      integer :: errflg
 ! LOCAL VARS
 
       REAL,     DIMENSION( its:ite ) ::                       U1D, &
@@ -204,10 +209,14 @@ CONTAINS
                                                               T1D
 
       REAL,     DIMENSION( its:ite ) ::                    dz8w1d
+      REAL,     DIMENSION( its:ite ) ::                    dx1d
 
       INTEGER ::  I,J
 
       DO J=jts,jte
+        DO i=its,ite
+           DX1D(i)=DX(i,j) 
+        ENDDO
         DO i=its,ite
           dz8w1d(I) = dz8w(i,1,j)
         ENDDO
@@ -233,7 +242,7 @@ CONTAINS
                 U10(ims,j),V10(ims,j),TH2(ims,j),T2(ims,j),        &
                 Q2(ims,j),FLHC(ims,j),FLQC(ims,j),QGH(ims,j),      &
                 QSFC(ims,j),LH(ims,j),                             &
-                GZ1OZ0(ims,j),WSPD(ims,j),BR(ims,j),ISFFLX,DX,     &
+                GZ1OZ0(ims,j),WSPD(ims,j),BR(ims,j),ISFFLX,DX1D,   &
                 SVP1,SVP2,SVP3,SVPT0,EP1,EP2,KARMAN,EOMEG,STBOLT,  &
                 P1000mb,                                           &
                 shalwater_z0,water_depth(ims,j),shalwater_depth,   & 
@@ -326,7 +335,8 @@ CONTAINS
                                                      TH2,T2,Q2,LH
 
                                     
-      REAL,     INTENT(IN   )               ::   CP,G,ROVCP,R,XLV,DX
+      REAL,     INTENT(IN   )               ::   CP,G,ROVCP,R,XLV
+      REAL,     DIMENSION( its:ite ),  INTENT(IN   )   ::      DX 
 
       INTEGER,  INTENT(IN )   ::     shalwater_z0 
       REAL,     INTENT(IN )   ::     shalwater_depth 
@@ -526,7 +536,7 @@ CONTAINS
         VCONV = SQRT(DTHVM)
         endif
 ! Mahrt and Sun low-res correction
-        VSGD = 0.32 * (max(dx/5000.-1.,0.))**.33
+        VSGD = 0.32 * (max(dx(i)/5000.-1.,0.))**.33
         WSPD(I)=SQRT(WSPD(I)*WSPD(I)+VCONV*VCONV+vsgd*vsgd)
         WSPD(I)=AMAX1(WSPD(I),0.1)
         BR(I)=GOVRTH(I)*ZA(I)*DTHVDZ/(WSPD(I)*WSPD(I))                        
