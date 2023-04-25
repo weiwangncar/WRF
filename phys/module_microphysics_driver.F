@@ -2521,6 +2521,10 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
                  ,has_reqc=has_reqc                                 &  ! for radiation +
                  ,has_reqi=has_reqi                                 &
                  ,has_reqs=has_reqs                                 &
+                 ,re_qc_bg=re_qc_bg,re_qi_bg=re_qi_bg               &
+                 ,re_qs_bg=re_qs_bg                                 &
+                 ,re_qc_max=re_qc_max,re_qi_max=re_qi_max           &
+                 ,re_qs_max=re_qs_max                               &
                  ,re_cloud=re_cloud                                 &
                  ,re_ice=re_ice                                     &
                  ,re_snow=re_snow                                   &  ! for radiation -  
