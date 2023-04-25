@@ -2,8 +2,8 @@
 !use mpas_log
  use ccpp_kinds,only: kind_phys
 
-!use mp_wsm6,only: mp_wsm6_run
-!use mp_wsm6_effectrad,only: mp_wsm6_effectRad_run
+ use mp_wsm6,only: mp_wsm6_run
+ use mp_wsm6_effectrad,only: mp_wsm6_effectRad_run
 
 
  implicit none
@@ -146,17 +146,17 @@
     endif
 
 !--- call to cloud microphysics scheme:
-!   call mp_wsm6_run(t=t_hv,q=qv_hv,qc=qc_hv,qi=qi_hv,qr=qr_hv,qs=qs_hv,qg=qg_hv, &
-!                den=den_hv,p=p_hv,delz=delz_hv,delt=delt,g=g,cpd=cpd,cpv=cpv,    &
-!                rd=rd,rv=rv,t0c=t0c,ep1=ep1,ep2=ep2,qmin=qmin,xls=xls,xlv0=xlv0, &
-!                xlf0=xlf0,den0=den0,denr=denr,cliq=cliq,cice=cice,psat=psat,     &
-!                rain=rain_hv,rainncv=rainncv_hv,sr=sr_hv,snow=snow_hv,           &
-!                snowncv=snowncv_hv,graupel=graupel_hv,graupelncv=graupelncv_hv,  &
-!                its=its,ite=ite,kts=kts,kte=kte,errmsg=errmsg,errflg=errflg      &
+    call mp_wsm6_run(t=t_hv,q=qv_hv,qc=qc_hv,qi=qi_hv,qr=qr_hv,qs=qs_hv,qg=qg_hv, &
+                 den=den_hv,p=p_hv,delz=delz_hv,delt=delt,g=g,cpd=cpd,cpv=cpv,    &
+                 rd=rd,rv=rv,t0c=t0c,ep1=ep1,ep2=ep2,qmin=qmin,xls=xls,xlv0=xlv0, &
+                 xlf0=xlf0,den0=den0,denr=denr,cliq=cliq,cice=cice,psat=psat,     &
+                 rain=rain_hv,rainncv=rainncv_hv,sr=sr_hv,snow=snow_hv,           &
+                 snowncv=snowncv_hv,graupel=graupel_hv,graupelncv=graupelncv_hv,  &
+                 its=its,ite=ite,kts=kts,kte=kte,errmsg=errmsg,errflg=errflg      &
 #if(WRF_CHEM == 1)
-!                ,rainprod2d=rainprod_hv,evapprod2d=evapprodhv                    &
+                 ,rainprod2d=rainprod_hv,evapprod2d=evapprodhv                    &
 #endif
-!                   )
+                    )
 
     do i = its,ite
        !inout arguments:
@@ -219,9 +219,9 @@
         enddo
      enddo
 
-!    call  mp_wsm6_effectRad_run(do_microp_re,t_hv,qc_hv,qi_hv,qs_hv,den_hv,qmin,t0c, &
-!                  re_qc_bg,re_qi_bg,re_qs_bg,re_qc_max,re_qi_max,re_qs_max,re_qc_hv, &
-!                  re_qi_hv,re_qs_hv,its,ite,kts,kte,errmsg,errflg)
+     call  mp_wsm6_effectRad_run(do_microp_re,t_hv,qc_hv,qi_hv,qs_hv,den_hv,qmin,t0c, &
+                   re_qc_bg,re_qi_bg,re_qs_bg,re_qc_max,re_qi_max,re_qs_max,re_qc_hv, &
+                   re_qi_hv,re_qs_hv,its,ite,kts,kte,errmsg,errflg)
 
      do k = kts,kte
         do i = its,ite
