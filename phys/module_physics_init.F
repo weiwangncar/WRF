@@ -4501,6 +4501,10 @@ CALL lsm_mosaic_init(IVGTYP,config_flags%ISWATER,config_flags%ISURBAN,config_fla
    INTEGER    :: nssl_ipelec_tmp
    INTEGER    :: i_err
 
+! To accommodate shared physics
+   character*256 :: errmsg
+   integer :: errflg
+
    warm_rain = .false.
    adv_moist_cond = .true.
    itf=min0(ite,ide-1)
