@@ -5,6 +5,7 @@ MAKE    =       make -i -r
 RM      =       rm -f
 
 MODULES = \
+	ccpp_kind.o \
 	module_bep_bem_helper.o \
 	complex_number_module.o \
 	module_cam_shr_kind_mod.o \
@@ -224,13 +225,15 @@ DIAGNOSTIC_MODULES_EM = \
 	module_diag_pld.o \
 	module_diag_zld.o \
 	module_diag_trad_fields.o \
-	ccpp_kind.o \
         module_diag_solar.o
   
 PHYSMMM_MODULES = \
 	./physics_mmm/bl_gwdo.o \
 	./physics_mmm/bl_ysu.o \
-	./physics_mmm/sf_sfclayrev.o
+	./physics_mmm/sf_sfclayrev.o \
+	./physics_mmm/module_libmassv.o \
+	./physics_mmm/mp_wsm6.o \
+	./physics_mmm/mp_wsm6_effectRad.o
 
 OBJS    =
 
@@ -239,16 +242,13 @@ TARGETDIR    =  ./
 
 $(LIBTARGET) :
 	../tools/manage_externals/checkout_externals --externals ../arch/Externals.cfg
-	$(MAKE) $(J) non_nmm physics_mmm ; \
-	$(AR) $(ARFLAGS) ../main/$(LIBWRFLIB) $(MODULES) $(OBJS)  \
+	$(MAKE) $(J) non_nmm ; \
+	$(AR) $(ARFLAGS) ../main/$(LIBWRFLIB) $(MODULES) $(OBJS) \
 		$(FIRE_MODULES) $(DIAGNOSTIC_MODULES_EM) $(PHYSMMM_MODULES)
 
 include ../configure.wrf
 
-non_nmm : $(MODULES) $(FIRE_MODULES) $(WIND_MODULES) $(OBJS) $(DIAGNOSTIC_MODULES_EM) $(PHYSMMM_MODULES)
-
-physics_mmm:
-	(cd physics_mmm; ${MAKE} all)
+non_nmm : $(MODULES) $(FIRE_MODULES) $(WIND_MODULES) $(OBJS) $(DIAGNOSTIC_MODULES_EM)
 
 submodules :
 	@if [ \( ! -f module_sf_noahmpdrv.F \) -o \( ! -f module_sf_noahmp_glacier.F \) -o \
