@@ -231,6 +231,7 @@ PHYSMMM_MODULES = \
 	./physics_mmm/bl_gwdo.o \
 	./physics_mmm/bl_ysu.o \
 	./physics_mmm/sf_sfclayrev.o \
+	./physics_mmm/cu_ntiedtke.o \
 	./physics_mmm/module_libmassv.o \
 	./physics_mmm/mp_wsm6.o \
 	./physics_mmm/mp_wsm6_effectRad.o
